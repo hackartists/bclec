@@ -1,11 +1,17 @@
 version: '3'
 
-services:
+networks:
+  dev-net:
+    external: true
 
+services:
   ca.kisa.bclec.co.kr:
       restart: always
       container_name: ca.kisa.bclec.co.kr
       image: hyperledger/fabric-ca:1.4.0
+      networks:
+        dev-net:
+          ipv4_address: 172.30.100.171
       environment:
         - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
         - FABRIC_CA_SERVER_CA_NAME=ca.kisa.bclec.co.kr
@@ -14,13 +20,14 @@ services:
       command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
       volumes:
         - ./crypto-config/peerOrganizations/kisa.bclec.co.kr/ca:/etc/hyperledger/fabric-ca-server-config
-      ports:
-        - 7054:7054
 
   ca.smartm2m.bclec.co.kr:
       restart: always
       container_name: ca.smartm2m.bclec.co.kr
       image: hyperledger/fabric-ca:1.4.0
+      networks:
+        dev-net:
+          ipv4_address: 172.30.100.172
       environment:
         - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
         - FABRIC_CA_SERVER_CA_NAME=ca.smartm2m.bclec.co.kr
@@ -29,12 +36,13 @@ services:
       command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
       volumes:
         - ./crypto-config/peerOrganizations/smartm2m.bclec.co.kr/ca:/etc/hyperledger/fabric-ca-server-config
-      ports:
-        - 8054:7054
 
   orderer0.bclec.co.kr:
     container_name: orderer0.bclec.co.kr
     image: hyperledger/fabric-orderer:1.4.0
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.173
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - ORDERER_GENERAL_LOCALMSPDIR=crypto-config/ordererOrganizations/bclec.co.kr/orderers/orderer0.bclec.co.kr/msp
@@ -42,14 +50,14 @@ services:
     volumes:
       - ./:/etc/hyperledger/fabric
     depends_on:
-
       - kafka0.bclec.co.kr
-    ports:
-      - 7050:7050
 
   kafka0.bclec.co.kr:
     container_name: kafka0.bclec.co.kr
     image: hyperledger/fabric-kafka:0.4.14
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.174
     environment:
       - KAFKA_ZOOKEEPER_CONNECT=zk.bclec.co.kr:2181
     depends_on:
@@ -59,19 +67,26 @@ services:
     restart: always
     container_name: zk.bclec.co.kr
     image: hyperledger/fabric-zookeeper:0.4.14
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.175
 
   couchdb.peer0.kisa.bclec.co.kr:
     container_name: couchdb.peer0.kisa.bclec.co.kr
     image: hyperledger/fabric-couchdb:0.4.14
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.17
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
-    ports:
-      - 5984:5984
 
   peer0.kisa.bclec.co.kr:
     container_name: peer0.kisa.bclec.co.kr
     image: hyperledger/fabric-peer:1.4.0
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.176
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/kisa.bclec.co.kr/peers/peer0.kisa.bclec.co.kr/msp
@@ -85,23 +100,23 @@ services:
     volumes:
       - ./:/etc/hyperledger/fabric
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 7051:7051
-      - 7052:7052
-      - 7053:7053
 
   couchdb.peer0.smartm2m.bclec.co.kr:
     container_name: couchdb.peer0.smartm2m.bclec.co.kr
     image: hyperledger/fabric-couchdb:0.4.14
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.177
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
-    ports:
-      - 6984:5984
 
   peer0.smartm2m.bclec.co.kr:
     container_name: peer0.smartm2m.bclec.co.kr
     image: hyperledger/fabric-peer:1.4.0
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.178
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/smartm2m.bclec.co.kr/peers/peer0.smartm2m.bclec.co.kr/msp
@@ -115,14 +130,13 @@ services:
     volumes:
       - ./:/etc/hyperledger/fabric
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 8051:7051
-      - 8052:7052
-      - 8053:7053
 
   cli:
     container_name: cli
     image: hyperledger/fabric-tools:1.4.0
+    networks:
+        dev-net:
+          ipv4_address: 172.30.100.179
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/kisa.bclec.co.kr/peers/peer0.kisa.bclec.co.kr/msp
