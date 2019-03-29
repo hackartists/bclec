@@ -1,9 +1,15 @@
 version: '3'
 
+networks:
+  dev-net:
+    external: true
+
 services:
   orderer.kisa.or.kr:
     container_name: bclec_orderer.kisa.or.kr
     image: hyperledger/fabric-orderer:1.4.0
+    networks:
+      - dev-net
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
     working_dir: /etc/hyperledger/fabric
@@ -18,6 +24,8 @@ services:
   ca.kisa.or.kr:
     container_name: bclec_ca.kisa.or.kr
     image: hyperledger/fabric-ca:1.4.0
+    networks:
+      - dev-net
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.kisa.or.kr
@@ -30,18 +38,24 @@ services:
   zookeeper:
     container_name: bclec_zookeeper
     image: hyperledger/fabric-zookeeper:0.4.14
+    networks:
+      - dev-net
 
   kafka:
     container_name: bclec_kafka
     image: hyperledger/fabric-kafka:0.4.14
     environment:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+    networks:
+      - dev-net
     depends_on:
       - zookeeper
 
   ca.bc.kisa.or.kr:
     container_name: bclec_ca.bc.kisa.or.kr
     image: hyperledger/fabric-ca:1.4.0
+    networks:
+      - dev-net
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.bc.kisa.or.kr
@@ -57,6 +71,8 @@ services:
   couchdb.peer0.bc.kisa.or.kr:
     container_name: bclec_couchdb.peer0.bc.kisa.or.kr
     image: hyperledger/fabric-couchdb:0.4.14
+    networks:
+      - dev-net
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
@@ -66,6 +82,8 @@ services:
   peer0.bc.kisa.or.kr:
     container_name: bclec_peer0.bc.kisa.or.kr
     image: hyperledger/fabric-peer:1.4.0
+    networks:
+      - dev-net
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/bc.kisa.or.kr/peers/peer0.bc.kisa.or.kr/msp
@@ -88,6 +106,8 @@ services:
   api.bc.kisa.or.kr:
     container_name: bclec_api.bc.kisa.or.kr
     image: registry.smartm2m.co.kr/scholar/api-server:latest
+    networks:
+      - dev-net
     environment:
       - FABRIC_API_CONFIG=/etc/hyperledger/jsonrpc/config.yaml
     volumes:
@@ -103,6 +123,8 @@ services:
   ca.bc.smartm2m.co.kr:
     container_name: bclec_ca.bc.smartm2m.co.kr
     image: hyperledger/fabric-ca:1.4.0
+    networks:
+      - dev-net
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.bc.smartm2m.co.kr
@@ -115,6 +137,8 @@ services:
   couchdb.peer0.bc.smartm2m.co.kr:
     container_name: bclec_couchdb.peer0.bc.smartm2m.co.kr
     image: hyperledger/fabric-couchdb:0.4.14
+    networks:
+      - dev-net
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
@@ -124,6 +148,8 @@ services:
   peer0.bc.smartm2m.co.kr:
     container_name: bclec_peer0.bc.smartm2m.co.kr
     image: hyperledger/fabric-peer:1.4.0
+    networks:
+      - dev-net
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/bc.smartm2m.co.kr/peers/peer0.bc.smartm2m.co.kr/msp
@@ -144,6 +170,8 @@ services:
   api.bc.smartm2m.co.kr:
     container_name: bclec_api.bc.smartm2m.co.kr
     image: registry.smartm2m.co.kr/scholar/api-server:latest
+    networks:
+      - dev-net
     environment:
       - FABRIC_API_CONFIG=/etc/hyperledger/jsonrpc/config.yaml
     volumes:
@@ -160,6 +188,8 @@ services:
     container_name: bclec_cli
     image: hyperledger/fabric-tools:1.4.0
     command: ["peer","node","start"]
+    networks:
+      - dev-net
     environment:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/bc.kisa.or.kr/peers/peer0.bc.kisa.or.kr/msp
