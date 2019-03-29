@@ -30,11 +30,11 @@ General:
     # TLS: TLS settings for the GRPC server.
     TLS:
         Enabled: false
-        PrivateKey: crypto-config/ordererOrganizations/smartm2m.co.kr/orderers/orderer.smartm2m.co.kr/tls/server.key 
-        Certificate: crypto-config/ordererOrganizations/smartm2m.co.kr/orderers/orderer.smartm2m.co.kr/tls/server.crt
+        PrivateKey: crypto-config/ordererOrganizations/bclec.co.kr/orderers/orderer.bclec.co.kr/tls/server.key 
+        Certificate: crypto-config/ordererOrganizations/bclec.co.kr/orderers/orderer.bclec.co.kr/tls/server.crt
         RootCAs:
-          - crypto-config/ordererOrganizations/smartm2m.co.kr/orderers/orderer.smartm2m.co.kr/tls/ca.crt
-          - crypto-config/peerOrganizations/pinocchio.smartm2m.co.kr/peers/peer0.pinocchio.smartm2m.co.kr/tls/ca.crt
+          - crypto-config/ordererOrganizations/bclec.co.kr/orderers/orderer.bclec.co.kr/tls/ca.crt
+          - crypto-config/peerOrganizations/kisa.bclec.co.kr/peers/peer0.kisa.bclec.co.kr/tls/ca.crt
         ClientAuthRequired: false
         ClientRootCAs:
     # Keepalive settings for the GRPC server.
@@ -82,24 +82,24 @@ General:
     #  - provisional: Utilizes a genesis profile, specified by GenesisProfile,
     #                 to dynamically generate a new genesis block.
     #  - file: Uses the file provided by GenesisFile as the genesis block.
-    GenesisMethod: file
+    GenesisMethod: provisional
 
     # Genesis profile: The profile to use to dynamically generate the genesis
     # block to use when initializing the orderer system channel and
     # GenesisMethod is set to "provisional". See the configtx.yaml file for the
     # descriptions of the available profiles. Ignored if GenesisMethod is set to
     # "file".
-    # GenesisProfile: MainChain
+    GenesisProfile: Mainchain
 
     # Genesis file: The file containing the genesis block to use when
     # initializing the orderer system channel and GenesisMethod is set to
     # "file". Ignored if GenesisMethod is set to "provisional".
-    GenesisFile: genesis.block
+    #GenesisFile: genesis.block
 
     # LocalMSPDir is where to find the private crypto material needed by the
     # orderer. It is set relative here as a default for dev environments but
     # should be changed to the real location in production.
-    LocalMSPDir: msp
+    LocalMSPDir: crypto-config/ordererOrganizations/bclec.co.kr/orderers/orderer.bclec.co.kr/msp
 
     # LocalMSPID is the identity to register the local MSP material with the MSP
     # manager. IMPORTANT: The local MSP ID of an orderer needs to match the MSP
