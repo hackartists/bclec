@@ -1,0 +1,173 @@
+version: '3'
+
+services:
+  orderer.kisa.or.kr:
+    container_name: bclec_orderer.kisa.or.kr
+    image: hyperledger/fabric-orderer:1.4.0
+    environment:
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+    working_dir: /etc/hyperledger/fabric
+    volumes:
+      - ./etc/cfg:/etc/hyperledger/fabric
+      - ./etc/crypto-config:/etc/hyperledger/fabric/crypto-config
+    depends_on:
+      - kafka
+    ports:
+      - 7050:7050
+
+  ca.kisa.or.kr:
+    container_name: bclec_ca.kisa.or.kr
+    image: hyperledger/fabric-ca:1.4.0
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.kisa.or.kr
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.kisa.or.kr-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/7ffc1ba1e998e8d0d9de2ccab07dd11da93310df5632ff8d6e97534839166dd4_sk
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./etc/crypto-config/ordererOrganizations/kisa.or.kr/ca:/etc/hyperledger/fabric-ca-server-config
+
+  zookeeper:
+    container_name: bclec_zookeeper
+    image: hyperledger/fabric-zookeeper:0.4.14
+
+  kafka:
+    container_name: bclec_kafka
+    image: hyperledger/fabric-kafka:0.4.14
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  ca.bc.kisa.or.kr:
+    container_name: bclec_ca.bc.kisa.or.kr
+    image: hyperledger/fabric-ca:1.4.0
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.bc.kisa.or.kr
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.bc.kisa.or.kr-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/16f45d5d75ac6d2f280bbde1088dd3366ab526059485cdd5c332bb29a986423e_sk
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./etc/crypto-config/peerOrganizations/bc.kisa.or.kr/ca:/etc/hyperledger/fabric-ca-server-config
+    ports:
+      - 7054:7054
+
+
+  couchdb.peer0.bc.kisa.or.kr:
+    container_name: bclec_couchdb.peer0.bc.kisa.or.kr
+    image: hyperledger/fabric-couchdb:0.4.14
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 31000:5984
+
+  peer0.bc.kisa.or.kr:
+    container_name: bclec_peer0.bc.kisa.or.kr
+    image: hyperledger/fabric-peer:1.4.0
+    environment:
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/bc.kisa.or.kr/peers/peer0.bc.kisa.or.kr/msp
+      - CORE_PEER_ID=peer0.bc.kisa.or.kr
+      - CORE_PEER_LOCALMSPID=kistiOrg
+    working_dir: /etc/hyperledger/fabric
+    volumes:
+      - ./etc/cfg:/etc/hyperledger/fabric
+      - ./etc/crypto-config:/etc/hyperledger/fabric/crypto-config
+      - ./build/blocks:/etc/hyperledger/fabric/block
+      - ./build/cc:/etc/hyperledger/fabric/plugin
+      - /var/run/docker.sock:/var/run/docker.sock
+    links:
+      - couchdb.peer0.bc.kisa.or.kr:couchdb
+    depends_on:
+      - couchdb.peer0.bc.kisa.or.kr
+    ports:
+      - 7051:7051
+
+  api.bc.kisa.or.kr:
+    container_name: bclec_api.bc.kisa.or.kr
+    image: registry.smartm2m.co.kr/scholar/api-server:latest
+    environment:
+      - FABRIC_API_CONFIG=/etc/hyperledger/jsonrpc/config.yaml
+    volumes:
+      - ./etc/apis/kisti-config.yaml:/etc/hyperledger/jsonrpc/config.yaml
+      - ./etc/apis/jrpc:/etc/hyperledger/jsonrpc/imports
+    ports:
+      - 21000:11000
+    depends_on:
+      - orderer.kisa.or.kr
+      - peer0.bc.kisa.or.kr
+      - ca.bc.kisa.or.kr
+
+  ca.bc.smartm2m.co.kr:
+    container_name: bclec_ca.bc.smartm2m.co.kr
+    image: hyperledger/fabric-ca:1.4.0
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.bc.smartm2m.co.kr
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.bc.smartm2m.co.kr-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/402f9c9a1999fcd960fefca15902ac255626bd7e780abe2a77f52dd501dc6a29_sk
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./etc/crypto-config/peerOrganizations/bc.smartm2m.co.kr/ca:/etc/hyperledger/fabric-ca-server-config
+
+  couchdb.peer0.bc.smartm2m.co.kr:
+    container_name: bclec_couchdb.peer0.bc.smartm2m.co.kr
+    image: hyperledger/fabric-couchdb:0.4.14
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+    ports:
+      - 31010:5984
+
+  peer0.bc.smartm2m.co.kr:
+    container_name: bclec_peer0.bc.smartm2m.co.kr
+    image: hyperledger/fabric-peer:1.4.0
+    environment:
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/bc.smartm2m.co.kr/peers/peer0.bc.smartm2m.co.kr/msp
+      - CORE_PEER_ID=peer0.bc.smartm2m.co.kr
+      - CORE_PEER_LOCALMSPID=pnuOrg
+    working_dir: /etc/hyperledger/fabric
+    volumes:
+      - ./etc/cfg:/etc/hyperledger/fabric
+      - ./etc/crypto-config:/etc/hyperledger/fabric/crypto-config
+      - ./build/blocks:/etc/hyperledger/fabric/block
+      - ./build/cc:/etc/hyperledger/fabric/plugin
+      - /var/run/docker.sock:/var/run/docker.sock
+    links:
+      - couchdb.peer0.bc.smartm2m.co.kr:couchdb
+    depends_on:
+      - couchdb.peer0.bc.smartm2m.co.kr
+
+  api.bc.smartm2m.co.kr:
+    container_name: bclec_api.bc.smartm2m.co.kr
+    image: registry.smartm2m.co.kr/scholar/api-server:latest
+    environment:
+      - FABRIC_API_CONFIG=/etc/hyperledger/jsonrpc/config.yaml
+    volumes:
+      - ./etc/apis/pnu-config.yaml:/etc/hyperledger/jsonrpc/config.yaml
+      - ./etc/apis/jrpc:/etc/hyperledger/jsonrpc/imports
+    ports:
+      - 21010:11000
+    depends_on:
+      - orderer.kisa.or.kr
+      - peer0.bc.smartm2m.co.kr
+      - ca.bc.smartm2m.co.kr
+
+  cli:
+    container_name: bclec_cli
+    image: hyperledger/fabric-tools:1.4.0
+    command: ["peer","node","start"]
+    environment:
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_PEER_MSPCONFIGPATH=crypto-config/peerOrganizations/bc.kisa.or.kr/peers/peer0.bc.kisa.or.kr/msp
+      - CORE_LEDGER_STATE_STATEDATABASE=goleveldb
+      - CORE_LOGGING_LEVEL=info
+    working_dir: /etc/hyperledger/fabric
+    volumes:
+      - /Users/hackartist/Data/devel/src:/opt/gopath/src
+      - ./etc/cfg:/etc/hyperledger/fabric
+      - ./build/blocks:/etc/hyperledger/fabric/blocks
+      - ./etc/crypto-config:/etc/hyperledger/fabric/crypto-config

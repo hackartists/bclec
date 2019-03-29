@@ -1,0 +1,37 @@
+#
+# Copyright Altoros 2017 All Rights Reserved.
+#
+# ---------------------------------------------------------------------------
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+# ---------------------------------------------------------------------------
+OrdererOrgs:
+  # ---------------------------------------------------------------------------
+  # Orderer
+  # ---------------------------------------------------------------------------
+  - Name: Orderer
+    Domain: kisa.or.kr
+ 
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: kisti
+    Domain: bc.kisa.or.kr
+    CA:
+       Hostname: ca
+       Country: KR
+       Province: Seoul
+       Locality: Seoul
+       OrganizationalUnit: KISA
+    Template:
+      Count: 7
+  - Name: smartm2m
+    Domain: bc.smartm2m.co.kr
+    CA:
+       Hostname: ca
+       Country: KR
+       Province: Busan
+       Locality: Busan
+       OrganizationalUnit: SmartM2M
+    Template:
+      Count: 7
